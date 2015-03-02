@@ -1,0 +1,32 @@
+@import url(http://fonts.googleapis.com/css?family=Lato);
+
+* {font-family: 'Lato', sans-serif;}
+
+img#userPic {
+  float: left;
+  padding-right: 10px;
+  height: 50px;
+  width: 50px;
+}
+
+p#firstName {
+  float: left;
+  text-align: left;
+  line-height: 0px;
+  font-size: 25px;
+  overflow-x: visible;
+  margin-top: 15px;
+}
+
+p#lastName {
+  text-align: left;
+  line-height: 0px;
+  font-size: 15px;
+  overflow-x: visible;
+}
+
+hr#separator {
+  clear: both;
+  margin-top: 20px;
+  border: 1px solid #888;
+}

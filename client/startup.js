@@ -25,7 +25,7 @@ Meteor.startup(function() {
 
   // DEFAULT_TRANSITION
   var defaultTransition = {curve: Easing.inOutQuad, duration: 200};
-  var secondaryTransition = {curve: Easing.outElastic, duration: 1000};
+  var secondaryTransition = {curve: Easing.outElastic, duration: 750};
   var instantTransition = {duration: 0};
   
   // KEEP TRACK OF MAIN WINDOW VIEW & PREVIEW WINDOWS
@@ -35,10 +35,12 @@ Meteor.startup(function() {
 
 /* BACKGROUND SURFACE */
   var backgroundSurface = new Surface({
-    properties: {background: "#444"}
+    properties: {
+      background: "#9999FF"
+    }
   });
 
-/* PANE SCALER */
+/* MENU BUTTON */
   var menuButton = new Surface({
     size: [30,30],
     properties: {
@@ -49,15 +51,23 @@ Meteor.startup(function() {
     isOpen: false
   });
 
+  var menuPanel = new Surface({
+    size: [250, 475],
+    properties: {
+      background: 'rgba(0,0,0,0)'
+    },
+    content: Blaze.toHTML(Template.menuPanel)
+  });
+
 /* WINDOW SURFACES */
-  var windowPanes = ['green', 'red', 'blue', 'yellow', 'purple'].map(function (color, index) {
+  var windowPanes = ['lightgreen', 'lightpink', 'lightblue', 'lightgoldenrodyellow', 'plum'].map(function (color, index) {
     var paneName = ['Listings', 'Deals', 'Contacts', 'Schedule', 'Dashboard'];
     var pane = new Surface({
       size: [undefined, undefined],
       properties: {
         backgroundColor: color
       },
-      content: "<h1 style='margin-left: 1em;'>" + paneName[index] + ": " + color + "</h1>"
+      content: "<p style='margin-left: 1em; font-size: 20px'>" + paneName[index] + ": " + color + "</p>"
     });
     pane.parentView = undefined;
     return pane;
@@ -78,6 +88,12 @@ Meteor.startup(function() {
       return renderController;
     });
 
+  var menuRender = new RenderController({
+    inTransition: defaultTransition,
+    outTransition: defaultTransition,
+    overlap: true
+  });
+
 /************ VIEWS |  END  ************/
 
 /************ MODIFIERS | START ************/
@@ -85,6 +101,10 @@ Meteor.startup(function() {
   menuButton.stateMod = new StateModifier();
   menuButton.stateMod.setAlign([0.01, 0.975]);
   menuButton.stateMod.setOrigin([0.01, 0.975]);
+
+  menuPanel.stateMod = new StateModifier();
+  menuPanel.stateMod.setAlign([0.01, 0.1]);
+  menuPanel.stateMod.setOrigin([0.01, 0.1]);
 
   allViews[0].stateMod = new StateModifier();
   allViews[0].stateMod.setAlign([1, 0]);
@@ -114,8 +134,13 @@ Meteor.startup(function() {
 
 /************ EVENTS | START ************/
 
-  menuButton.on('click', function () {
+  menuButton.on('mouseover', function () {
     allViews[0].stateMod.setTransform(Transform.scale(0.8, 0.8, 1), defaultTransition);
+
+
+    menuRender.show(menuPanel);
+    menuPanel.stateMod.setTransform(Transform.translate(0, 0, 0), defaultTransition);
+
 
     Timer.setTimeout(function(){
       allViews[1].stateMod.setAlign([0.3, 0.975], defaultTransition);
@@ -139,7 +164,7 @@ Meteor.startup(function() {
     menuButton.setProperties({zIndex: -10});
     menuButton.isOpen = !menuButton.isOpen;
   });
-
+/*
   menuButton.on('mouseover', function () {
     menuButton.setProperties({background: "#000"});
   });
@@ -147,7 +172,7 @@ Meteor.startup(function() {
   menuButton.on('mouseout', function () {
     menuButton.setProperties({background: "none"});
   });
-
+*/
   windowPanes.forEach(function (pane) {
     pane.on('click', function () {
       if (menuButton.isOpen) {
@@ -186,6 +211,9 @@ Meteor.startup(function() {
           allViews[4].stateMod.setOrigin([0.9375, 1.2], defaultTransition);
           menuButton.isOpen = !menuButton.isOpen;
 
+          menuPanel.stateMod.setTransform(Transform.translate(-475, 0, 0), defaultTransition);
+          menuRender.show();
+
         Timer.setTimeout(function() {
           menuButton.stateMod.setOpacity(1, defaultTransition);
           menuButton.setProperties({zIndex: 10});
@@ -213,6 +241,7 @@ allViews.forEach(function (view, index, array) {
   mainContext.add(allViews[4].stateMod).add(allViews[4]);
   mainContext.add(allViews[0].stateMod).add(allViews[0]);
   mainContext.add(menuButton.stateMod).add(menuButton);
+  mainContext.add(menuPanel.stateMod).add(menuRender);
 
 /************ INIT & BUILD TREE |  END  ************/
 
